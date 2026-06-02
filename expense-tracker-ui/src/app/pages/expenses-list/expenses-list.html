@@ -1,0 +1,26 @@
+<div style="padding: 20px;">
+  <h2>Expenses</h2>
+  <button (click)="goToAdd()">+ Add Expense</button>
+  <p>Count: {{ expenses.length }}</p>
+ 
+  <table border="1" width="100%" style="margin-top: 20px;">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Category</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of expenses">
+        <td>{{ e.title }}</td>
+        <td>{{ e.amount }}</td>
+        <td>{{ e.expenseDate }}</td>
+        <td>{{ e.categoryName }}</td>
+        <td><button (click)="delete(e.id)">Delete</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
