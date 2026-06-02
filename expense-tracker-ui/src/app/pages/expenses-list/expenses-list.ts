@@ -1,12 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgFor } from '@angular/common';
 import { ExpenseService, Expense } from '../../services/expense';
  
 @Component({
   selector: 'app-expenses-list',
   standalone: true,
-  imports: [NgFor],
+  imports: [],
   templateUrl: './expenses-list.html',
   styleUrl: './expenses-list.css'
 })
