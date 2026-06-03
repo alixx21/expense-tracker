@@ -5,7 +5,6 @@ import { ExpenseService } from '../../services/expense';
 import { Expense } from '../../shared/interfaces/expense';
 
 type SortField = 'expenseDate' | 'categoryName' | 'amount';
-type BackendSortField = 'date' | 'category' | 'amount';
 
 @Component({
   selector: 'app-expenses-list',
@@ -29,19 +28,9 @@ export class ExpensesListComponent implements OnInit {
     this.load();
   }
 
-  private mapToBackendField(field: SortField): BackendSortField {
-    const fieldMap: Record<SortField, BackendSortField> = {
-      expenseDate: 'date',
-      categoryName: 'category',
-      amount: 'amount',
-    };
-    return fieldMap[field];
-  }
-
   load(): void {
     this.isLoading.set(true);
-    const backendField = this.mapToBackendField(this.sortField());
-    this.expenseService.getAll(backendField, this.sortDirection()).subscribe((data) => {
+    this.expenseService.getAll(this.sortField(), this.sortDirection()).subscribe((data) => {
       this.expenses.set(data);
       this.isLoading.set(false);
     });

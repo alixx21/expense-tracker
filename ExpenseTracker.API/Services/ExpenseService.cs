@@ -33,7 +33,9 @@ public class ExpenseService : IExpenseService
                 "title" => isDescending ? query.OrderByDescending(e => e.Title) : query.OrderBy(e => e.Title),
                 "amount" => isDescending ? query.OrderByDescending(e => e.Amount) : query.OrderBy(e => e.Amount),
                 "date" => isDescending ? query.OrderByDescending(e => e.ExpenseDate) : query.OrderBy(e => e.ExpenseDate),
+                "expensedate" => isDescending ? query.OrderByDescending(e => e.ExpenseDate) : query.OrderBy(e => e.ExpenseDate),
                 "category" => isDescending ? query.OrderByDescending(e => e.Category != null ? e.Category.Name : "") : query.OrderBy(e => e.Category != null ? e.Category.Name : ""),
+                "categoryname" => isDescending ? query.OrderByDescending(e => e.Category != null ? e.Category.Name : "") : query.OrderBy(e => e.Category != null ? e.Category.Name : ""),
                 _ => query
             };
         }
