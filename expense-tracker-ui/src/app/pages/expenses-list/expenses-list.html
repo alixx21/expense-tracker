@@ -1,27 +1,75 @@
-<div style="padding: 20px;">
-  <h2>Expenses</h2>
-  <button (click)="goToAdd()">+ Add Expense</button>
- 
-  <table border="1" width="100%" style="margin-top: 20px;">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Amount</th>
-        <th>Date</th>
-        <th>Category</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (e of expenses; track e.id) {
-        <tr>
-          <td>{{ e.title }}</td>
-          <td>{{ e.amount }}</td>
-          <td>{{ e.expenseDate }}</td>
-          <td>{{ e.categoryName }}</td>
-          <td><button (click)="delete(e.id)">Delete</button></td>
-        </tr>
-      }
-    </tbody>
-  </table>
+<div class="page">
+  <div class="page-header">
+    <h2>Expenses</h2>
+    <div class="page-header-actions">
+      <button type="button" class="btn btn-secondary" (click)="goToCategories()">
+        Categories
+      </button>
+      <button type="button" class="btn btn-primary" (click)="goToAdd()">+ Add expense</button>
+    </div>
+  </div>
+
+  <div class="card">
+    @if (expenses().length === 0) {
+      <p class="empty-state">No expenses yet. Add your first one.</p>
+    } @else {
+      <div class="sort-bar">
+        <span class="sort-bar-label">Sort by:</span>
+        <button
+          type="button"
+          class="btn btn-sort"
+          [class.active]="isSortActive('expenseDate')"
+          (click)="toggleSort('expenseDate')"
+        >
+          {{ sortLabel('expenseDate') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-sort"
+          [class.active]="isSortActive('categoryName')"
+          (click)="toggleSort('categoryName')"
+        >
+          {{ sortLabel('categoryName') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-sort"
+          [class.active]="isSortActive('amount')"
+          (click)="toggleSort('amount')"
+        >
+          {{ sortLabel('amount') }}
+        </button>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of sortedExpenses(); track e.id) {
+            <tr>
+              <td>{{ e.title }}</td>
+              <td>{{ e.amount | currency }}</td>
+              <td>{{ e.expenseDate | date: 'mediumDate' }}</td>
+              <td>{{ e.categoryName }}</td>
+              <td class="actions-cell">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="edit(e.id)">
+                  Edit
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="delete(e.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
 </div>

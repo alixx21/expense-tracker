@@ -1,25 +1,70 @@
-<div style="padding: 20px;">
-  <h2>Add Expense</h2>
+<div class="page">
+  <div class="page-header">
+    <h2>{{ isEdit() ? 'Edit expense' : 'Add expense' }}</h2>
+  </div>
 
-  <div>
-    <label>Title</label><br>
-    <input [(ngModel)]="form.title" />
+  <div class="card">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input
+        id="title"
+        [ngModel]="form().title"
+        (ngModelChange)="updateField('title', $event)"
+        name="title"
+        [placeholder]="isEdit() ? placeholderTitle() : ''"
+      />
+    </div>
+    <div class="form-group">
+      <label for="amount">Amount</label>
+      <input
+        id="amount"
+        type="number"
+        [ngModel]="form().amount"
+        (ngModelChange)="updateField('amount', $event === '' || $event === null ? null : +$event)"
+        name="amount"
+        min="0"
+        step="0.01"
+        [placeholder]="isEdit() ? placeholderAmount() : ''"
+      />
+    </div>
+    <div class="form-group">
+      <label for="expenseDate">Date</label>
+      <input
+        id="expenseDate"
+        type="date"
+        [ngModel]="form().expenseDate"
+        (ngModelChange)="updateField('expenseDate', $event)"
+        name="expenseDate"
+        [placeholder]="isEdit() ? placeholderDate() : ''"
+      />
+      @if (isEdit() && !form().expenseDate && placeholderDate()) {
+        <span class="field-hint">Current: {{ placeholderDate() }}</span>
+      }
+    </div>
+    <div class="form-group">
+      <label for="categoryId">Category</label>
+      <select
+        id="categoryId"
+        [ngModel]="form().categoryId"
+        (ngModelChange)="updateField('categoryId', +$event)"
+        name="categoryId"
+      >
+        @if (isEdit() && form().categoryId === 0 && placeholderCategory()) {
+          <option value="0" disabled hidden>{{ placeholderCategory() }}</option>
+        }
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+      @if (isEdit() && placeholderCategory()) {
+        <span class="field-hint">Current: {{ placeholderCategory() }}</span>
+      }
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" (click)="save()">
+        {{ isEdit() ? 'Update' : 'Save' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    </div>
   </div>
-  <div>
-    <label>Amount</label><br>
-    <input type="number" [(ngModel)]="form.amount" />
-  </div>
-  <div>
-    <label>Date</label><br>
-    <input type="date" [(ngModel)]="form.expenseDate" />
-  </div>
-  <div>
-    <label>Category</label><br>
-    <select [(ngModel)]="form.categoryId">
-      <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
-    </select>
-  </div>
-  <br>
-  <button (click)="save()">Save</button>
-  <button (click)="cancel()">Cancel</button>
 </div>

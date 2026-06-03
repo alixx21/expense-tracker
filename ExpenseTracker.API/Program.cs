@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ExpenseTracker.API.Data;
+using ExpenseTracker.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

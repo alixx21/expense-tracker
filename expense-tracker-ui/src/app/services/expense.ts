@@ -1,40 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
- 
-export interface Expense {
-  id: number;
-  title: string;
-  amount: number;
-  expenseDate: string;
-  categoryName: string;
-}
- 
-export interface Category {
-  id: number;
-  name: string;
-}
- 
+import { Expense, ExpenseCreate } from '../shared/interfaces/expense.interface';
+
 @Injectable({ providedIn: 'root' })
 export class ExpenseService {
-  private apiUrl = 'http://localhost:5018/api/expense';
-  private categoryUrl = 'http://localhost:5018/api/category';
- 
+  private readonly apiUrl = '/api/expense';
+
   constructor(private http: HttpClient) {}
- 
+
   getAll(): Observable<Expense[]> {
     return this.http.get<Expense[]>(this.apiUrl);
   }
- 
-  create(data: any): Observable<any> {
-    return this.http.post(this.apiUrl, data);
+
+  getById(id: number): Observable<Expense> {
+    return this.http.get<Expense>(`${this.apiUrl}/${id}`);
   }
- 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+
+  create(data: ExpenseCreate): Observable<Expense> {
+    return this.http.post<Expense>(this.apiUrl, data);
   }
- 
-  getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.categoryUrl);
+
+  update(id: number, data: ExpenseCreate): Observable<Expense> {
+    return this.http.put<Expense>(`${this.apiUrl}/${id}`, data);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

@@ -1,0 +1,72 @@
+<div class="page">
+  <div class="page-header">
+    <h2>Categories</h2>
+    <button type="button" class="btn btn-secondary" (click)="back()">Back to expenses</button>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">Add category</h3>
+    <div class="inline-form">
+      <input
+        type="text"
+        [(ngModel)]="newCategoryName"
+        name="newCategoryName"
+        placeholder="Category name"
+        (keyup.enter)="add()"
+      />
+      <button type="button" class="btn btn-primary" (click)="add()">Add</button>
+    </div>
+  </div>
+
+  <div class="card card-spaced">
+    @if (categories().length === 0) {
+      <p class="empty-state">No categories yet.</p>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of categories(); track c.id) {
+            <tr>
+              <td>
+                @if (editingId() === c.id) {
+                  <input
+                    type="text"
+                    class="table-input"
+                    [(ngModel)]="editName"
+                    [name]="'editName' + c.id"
+                    (keyup.enter)="saveEdit(c.id)"
+                    (keyup.escape)="cancelEdit()"
+                  />
+                } @else {
+                  {{ c.name }}
+                }
+              </td>
+              <td class="actions-cell">
+                @if (editingId() === c.id) {
+                  <button type="button" class="btn btn-primary btn-sm" (click)="saveEdit(c.id)">
+                    Save
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="cancelEdit()">
+                    Cancel
+                  </button>
+                } @else {
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="startEdit(c)">
+                    Edit
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="delete(c.id)">
+                    Delete
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
