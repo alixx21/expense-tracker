@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ExpenseTracker.API.Data;
+using ExpenseTracker.API.Dtos;
+using ExpenseTracker.API.Mappers;
 using ExpenseTracker.API.Models;
 using ExpenseTracker.API.Services;
 
@@ -22,16 +24,7 @@ public class ExpenseController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null)
     {
         var expenses = await _expenseService.GetAllAsync(sortBy, sortDirection);
-        var expenseList = expenses.Select(e => new ExpenseListItem
-        {
-            Id = e.Id,
-            Title = e.Title,
-            Amount = e.Amount,
-            ExpenseDate = e.ExpenseDate,
-            CategoryName = e.Category != null ? e.Category.Name : "",
-            CategoryId = e.CategoryId
-        }).ToList();
-        return Ok(expenseList);
+        return Ok(expenses.Select(e => e.ToDto()).ToList());
     }
 
     [HttpGet("{id}")]
@@ -39,52 +32,41 @@ public class ExpenseController : ControllerBase
     {
         var expense = await _expenseService.GetByIdWithCategoryAsync(id);
         if (expense == null) return NotFound();
-        
-        var expenseItem = new ExpenseListItem
-        {
-            Id = expense.Id,
-            Title = expense.Title,
-            Amount = expense.Amount,
-            ExpenseDate = expense.ExpenseDate,
-            CategoryName = expense.Category != null ? expense.Category.Name : "",
-            CategoryId = expense.CategoryId
-        };
-        return Ok(expenseItem);
+        return Ok(expense.ToDto());
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Expense expense)
+    public async Task<IActionResult> Create([FromBody] ExpenseRequestDto expenseDto)
     {
-        if (string.IsNullOrWhiteSpace(expense.Title))
+        if (string.IsNullOrWhiteSpace(expenseDto.Title))
             return BadRequest(new { message = "Title is required" });
         
-        if (expense.Amount <= 0)
+        if (expenseDto.Amount <= 0)
             return BadRequest(new { message = "Amount must be greater than 0" });
 
-        expense.ExpenseDate = DateTime.SpecifyKind(expense.ExpenseDate, DateTimeKind.Utc);
+        var expense = expenseDto.ToEntity();
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
-        return Ok(expense);
+        await _context.Entry(expense).Reference(e => e.Category).LoadAsync();
+        return Ok(expense.ToDto());
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Expense expense)
+    public async Task<IActionResult> Update(int id, [FromBody] ExpenseRequestDto expenseDto)
     {
-        if (string.IsNullOrWhiteSpace(expense.Title))
+        if (string.IsNullOrWhiteSpace(expenseDto.Title))
             return BadRequest(new { message = "Title is required" });
         
-        if (expense.Amount <= 0)
+        if (expenseDto.Amount <= 0)
             return BadRequest(new { message = "Amount must be greater than 0" });
 
         var existing = await _context.Expenses.FindAsync(id);
         if (existing == null) return NotFound();
 
-        existing.Title = expense.Title;
-        existing.Amount = expense.Amount;
-        existing.ExpenseDate = DateTime.SpecifyKind(expense.ExpenseDate, DateTimeKind.Utc);
-        existing.CategoryId = expense.CategoryId;
+        existing.UpdateFrom(expenseDto);
         await _context.SaveChangesAsync();
-        return Ok(existing);
+        await _context.Entry(existing).Reference(e => e.Category).LoadAsync();
+        return Ok(existing.ToDto());
     }
 
     [HttpDelete("{id}")]
