@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../services/category';
-import { Category } from '../../shared/interfaces/category.interface';
+import { Category } from '../../shared/interfaces/category';
 
 @Component({
   selector: 'app-categories',

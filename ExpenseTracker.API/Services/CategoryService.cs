@@ -4,6 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.API.Services;
 
+public interface ICategoryService
+{
+    Task<IEnumerable<Category>> GetAllAsync();
+    Task<Category?> GetByIdAsync(int id);
+    Task<bool> DeleteAsync(int id);
+}
+
 public class CategoryService : ICategoryService
 {
     private readonly AppDbContext _context;
@@ -21,23 +28,6 @@ public class CategoryService : ICategoryService
     public async Task<Category?> GetByIdAsync(int id)
     {
         return await _context.Categories.FindAsync(id);
-    }
-
-    public async Task<Category> CreateAsync(Category category)
-    {
-        _context.Categories.Add(category);
-        await _context.SaveChangesAsync();
-        return category;
-    }
-
-    public async Task<Category?> UpdateAsync(int id, Category category)
-    {
-        var existing = await _context.Categories.FindAsync(id);
-        if (existing == null) return null;
-
-        existing.Name = category.Name;
-        await _context.SaveChangesAsync();
-        return existing;
     }
 
     public async Task<bool> DeleteAsync(int id)

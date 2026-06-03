@@ -4,6 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.API.Services;
 
+public interface IExpenseService
+{
+    Task<IEnumerable<Expense>> GetAllAsync(string? sortBy = null, string? sortDirection = null);
+    Task<Expense?> GetByIdAsync(int id);
+    Task<Expense?> GetByIdWithCategoryAsync(int id);
+    Task<bool> DeleteAsync(int id);
+}
+
 public class ExpenseService : IExpenseService
 {
     private readonly AppDbContext _context;
@@ -13,58 +21,36 @@ public class ExpenseService : IExpenseService
         _context = context;
     }
 
-    public async Task<IEnumerable<ExpenseListItem>> GetAllAsync()
+    public async Task<IEnumerable<Expense>> GetAllAsync(string? sortBy = null, string? sortDirection = null)
+    {
+        var query = _context.Expenses.Include(e => e.Category).AsQueryable();
+
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            var isDescending = sortDirection?.ToLower() == "desc";
+            query = sortBy.ToLower() switch
+            {
+                "title" => isDescending ? query.OrderByDescending(e => e.Title) : query.OrderBy(e => e.Title),
+                "amount" => isDescending ? query.OrderByDescending(e => e.Amount) : query.OrderBy(e => e.Amount),
+                "date" => isDescending ? query.OrderByDescending(e => e.ExpenseDate) : query.OrderBy(e => e.ExpenseDate),
+                "category" => isDescending ? query.OrderByDescending(e => e.Category != null ? e.Category.Name : "") : query.OrderBy(e => e.Category != null ? e.Category.Name : ""),
+                _ => query
+            };
+        }
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<Expense?> GetByIdAsync(int id)
+    {
+        return await _context.Expenses.FindAsync(id);
+    }
+
+    public async Task<Expense?> GetByIdWithCategoryAsync(int id)
     {
         return await _context.Expenses
             .Include(e => e.Category)
-            .Select(e => new ExpenseListItem
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Amount = e.Amount,
-                ExpenseDate = e.ExpenseDate,
-                CategoryName = e.Category != null ? e.Category.Name : "",
-                CategoryId = e.CategoryId
-            })
-            .ToListAsync();
-    }
-
-    public async Task<ExpenseListItem?> GetByIdAsync(int id)
-    {
-        return await _context.Expenses
-            .Include(e => e.Category)
-            .Where(e => e.Id == id)
-            .Select(e => new ExpenseListItem
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Amount = e.Amount,
-                ExpenseDate = e.ExpenseDate,
-                CategoryName = e.Category != null ? e.Category.Name : "",
-                CategoryId = e.CategoryId
-            })
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<Expense> CreateAsync(Expense expense)
-    {
-        expense.ExpenseDate = DateTime.SpecifyKind(expense.ExpenseDate, DateTimeKind.Utc);
-        _context.Expenses.Add(expense);
-        await _context.SaveChangesAsync();
-        return expense;
-    }
-
-    public async Task<Expense?> UpdateAsync(int id, Expense expense)
-    {
-        var existing = await _context.Expenses.FindAsync(id);
-        if (existing == null) return null;
-
-        existing.Title = expense.Title;
-        existing.Amount = expense.Amount;
-        existing.ExpenseDate = DateTime.SpecifyKind(expense.ExpenseDate, DateTimeKind.Utc);
-        existing.CategoryId = expense.CategoryId;
-        await _context.SaveChangesAsync();
-        return existing;
+            .FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public async Task<bool> DeleteAsync(int id)

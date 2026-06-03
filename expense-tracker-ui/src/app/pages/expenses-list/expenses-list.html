@@ -41,35 +41,39 @@
         </button>
       </div>
 
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Category</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (e of sortedExpenses(); track e.id) {
+      @if (isLoading()) {
+        <p class="loading-state">Loading...</p>
+      } @else {
+        <table class="data-table">
+          <thead>
             <tr>
-              <td>{{ e.title }}</td>
-              <td>{{ e.amount | currency }}</td>
-              <td>{{ e.expenseDate | date: 'mediumDate' }}</td>
-              <td>{{ e.categoryName }}</td>
-              <td class="actions-cell">
-                <button type="button" class="btn btn-secondary btn-sm" (click)="edit(e.id)">
-                  Edit
-                </button>
-                <button type="button" class="btn btn-danger btn-sm" (click)="delete(e.id)">
-                  Delete
-                </button>
-              </td>
+              <th>Title</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Category</th>
+              <th></th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (e of expenses(); track e.id) {
+              <tr>
+                <td>{{ e.title }}</td>
+                <td>{{ e.amount | currency }}</td>
+                <td>{{ e.expenseDate | date: 'mediumDate' }}</td>
+                <td>{{ e.categoryName }}</td>
+                <td class="actions-cell">
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="edit(e.id)">
+                    Edit
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="delete(e.id)">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     }
   </div>
 </div>

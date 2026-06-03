@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Expense, ExpenseCreate } from '../shared/interfaces/expense.interface';
+import { Expense, ExpenseCreate } from '../shared/interfaces/expense';
 
 @Injectable({ providedIn: 'root' })
 export class ExpenseService {
@@ -9,8 +9,11 @@ export class ExpenseService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Expense[]> {
-    return this.http.get<Expense[]>(this.apiUrl);
+  getAll(sortBy?: string, sortDirection?: string): Observable<Expense[]> {
+    let params = new HttpParams();
+    if (sortBy) params = params.set('sortBy', sortBy);
+    if (sortDirection) params = params.set('sortDirection', sortDirection);
+    return this.http.get<Expense[]>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<Expense> {

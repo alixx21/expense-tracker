@@ -1,10 +1,11 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ExpenseService } from '../../services/expense';
-import { Expense } from '../../shared/interfaces/expense.interface';
+import { Expense } from '../../shared/interfaces/expense';
 
 type SortField = 'expenseDate' | 'categoryName' | 'amount';
+type BackendSortField = 'date' | 'category' | 'amount';
 
 @Component({
   selector: 'app-expenses-list',
@@ -17,26 +18,7 @@ export class ExpensesListComponent implements OnInit {
   readonly expenses = signal<Expense[]>([]);
   readonly sortField = signal<SortField>('expenseDate');
   readonly sortDirection = signal<'asc' | 'desc'>('desc');
-
-  readonly sortedExpenses = computed(() => {
-    const field = this.sortField();
-    const direction = this.sortDirection();
-    const list = [...this.expenses()];
-
-    list.sort((a, b) => {
-      let cmp = 0;
-      if (field === 'amount') {
-        cmp = a.amount - b.amount;
-      } else if (field === 'expenseDate') {
-        cmp = new Date(a.expenseDate).getTime() - new Date(b.expenseDate).getTime();
-      } else {
-        cmp = a.categoryName.localeCompare(b.categoryName, undefined, { sensitivity: 'base' });
-      }
-      return direction === 'asc' ? cmp : -cmp;
-    });
-
-    return list;
-  });
+  readonly isLoading = signal(false);
 
   constructor(
     private expenseService: ExpenseService,
@@ -47,9 +29,21 @@ export class ExpensesListComponent implements OnInit {
     this.load();
   }
 
+  private mapToBackendField(field: SortField): BackendSortField {
+    const fieldMap: Record<SortField, BackendSortField> = {
+      expenseDate: 'date',
+      categoryName: 'category',
+      amount: 'amount',
+    };
+    return fieldMap[field];
+  }
+
   load(): void {
-    this.expenseService.getAll().subscribe((data) => {
+    this.isLoading.set(true);
+    const backendField = this.mapToBackendField(this.sortField());
+    this.expenseService.getAll(backendField, this.sortDirection()).subscribe((data) => {
       this.expenses.set(data);
+      this.isLoading.set(false);
     });
   }
 
@@ -60,6 +54,7 @@ export class ExpensesListComponent implements OnInit {
       this.sortField.set(field);
       this.sortDirection.set(field === 'expenseDate' ? 'desc' : 'asc');
     }
+    this.load();
   }
 
   sortLabel(field: SortField): string {

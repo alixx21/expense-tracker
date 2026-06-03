@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ExpenseTracker.API.Data;
 using ExpenseTracker.API.Models;
 using ExpenseTracker.API.Services;
 
@@ -9,10 +10,12 @@ namespace ExpenseTracker.API.Controllers;
 public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
+    private readonly AppDbContext _context;
 
-    public CategoryController(ICategoryService categoryService)
+    public CategoryController(ICategoryService categoryService, AppDbContext context)
     {
         _categoryService = categoryService;
+        _context = context;
     }
 
     [HttpGet]
@@ -31,18 +34,28 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Category category)
+    public async Task<IActionResult> Create([FromBody] Category category)
     {
-        var created = await _categoryService.CreateAsync(category);
-        return Ok(created);
+        if (string.IsNullOrWhiteSpace(category.Name))
+            return BadRequest(new { message = "Category name is required" });
+
+        _context.Categories.Add(category);
+        await _context.SaveChangesAsync();
+        return Ok(category);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Category category)
+    public async Task<IActionResult> Update(int id, [FromBody] Category category)
     {
-        var updated = await _categoryService.UpdateAsync(id, category);
-        if (updated == null) return NotFound();
-        return Ok(updated);
+        if (string.IsNullOrWhiteSpace(category.Name))
+            return BadRequest(new { message = "Category name is required" });
+
+        var existing = await _context.Categories.FindAsync(id);
+        if (existing == null) return NotFound();
+
+        existing.Name = category.Name;
+        await _context.SaveChangesAsync();
+        return Ok(existing);
     }
 
     [HttpDelete("{id}")]

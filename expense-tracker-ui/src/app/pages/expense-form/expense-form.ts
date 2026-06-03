@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService } from '../../services/expense';
 import { CategoryService } from '../../services/category';
-import { Category } from '../../shared/interfaces/category.interface';
-import { Expense, ExpenseCreate } from '../../shared/interfaces/expense.interface';
+import { Category } from '../../shared/interfaces/category';
+import { Expense, ExpenseCreate } from '../../shared/interfaces/expense';
 
 interface ExpenseFormState {
   title: string;
@@ -24,7 +24,6 @@ export class ExpenseFormComponent implements OnInit {
   readonly categories = signal<Category[]>([]);
   readonly expenseId = signal<number | null>(null);
   readonly isEdit = computed(() => this.expenseId() !== null);
-  /** Original expense — used for placeholders and fallback on save */
   readonly original = signal<Expense | null>(null);
 
   readonly form = signal<ExpenseFormState>({
