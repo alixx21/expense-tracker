@@ -11,6 +11,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddAutoMapper(typeof(ExpenseTracker.API.Mappers.CategoryProfile));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

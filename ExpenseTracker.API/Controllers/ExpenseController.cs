@@ -47,7 +47,6 @@ public class ExpenseController : ControllerBase
         var expense = expenseDto.ToEntity();
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
-        await _context.Entry(expense).Reference(e => e.Category).LoadAsync();
         return Ok(expense.ToDto());
     }
 
@@ -65,7 +64,6 @@ public class ExpenseController : ControllerBase
 
         existing.UpdateFrom(expenseDto);
         await _context.SaveChangesAsync();
-        await _context.Entry(existing).Reference(e => e.Category).LoadAsync();
         return Ok(existing.ToDto());
     }
 

@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 using ExpenseTracker.API.Data;
 using ExpenseTracker.API.Dtos;
-using ExpenseTracker.API.Mappers;
+using ExpenseTracker.API.Models;
 using ExpenseTracker.API.Services;
 
 namespace ExpenseTracker.API.Controllers;
@@ -12,18 +13,20 @@ public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public CategoryController(ICategoryService categoryService, AppDbContext context)
+    public CategoryController(ICategoryService categoryService, AppDbContext context, IMapper mapper)
     {
         _categoryService = categoryService;
         _context = context;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var categories = await _categoryService.GetAllAsync();
-        return Ok(categories.Select(c => c.ToDto()));
+        return Ok(categories.Select(c => _mapper.Map<CategoryDto>(c)));
     }
 
     [HttpGet("{id}")]
@@ -31,7 +34,7 @@ public class CategoryController : ControllerBase
     {
         var category = await _categoryService.GetByIdAsync(id);
         if (category == null) return NotFound();
-        return Ok(category.ToDto());
+        return Ok(_mapper.Map<CategoryDto>(category));
     }
 
     [HttpPost]
@@ -40,10 +43,10 @@ public class CategoryController : ControllerBase
         if (string.IsNullOrWhiteSpace(categoryDto.Name))
             return BadRequest(new { message = "Category name is required" });
 
-        var category = categoryDto.ToEntity();
+        var category = _mapper.Map<Category>(categoryDto);
         _context.Categories.Add(category);
         await _context.SaveChangesAsync();
-        return Ok(category.ToDto());
+        return Ok(_mapper.Map<CategoryDto>(category));
     }
 
     [HttpPut("{id}")]
@@ -55,9 +58,9 @@ public class CategoryController : ControllerBase
         var existing = await _context.Categories.FindAsync(id);
         if (existing == null) return NotFound();
 
-        existing.UpdateFrom(categoryDto);
+        _mapper.Map(categoryDto, existing);
         await _context.SaveChangesAsync();
-        return Ok(existing.ToDto());
+        return Ok(_mapper.Map<CategoryDto>(existing));
     }
 
     [HttpDelete("{id}")]

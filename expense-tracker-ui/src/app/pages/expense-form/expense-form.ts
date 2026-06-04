@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ExpenseService } from '../../services/expense';
-import { CategoryService } from '../../services/category';
+import { ExpenseService } from '../../data-access/expense.service';
+import { CategoryService } from '../../data-access/category.service';
 import { Category } from '../../shared/interfaces/category';
 import { Expense, ExpenseCreate } from '../../shared/interfaces/expense';
 
@@ -89,34 +89,25 @@ export class ExpenseFormComponent implements OnInit {
     return this.original()?.categoryName ?? '';
   }
 
-  private buildPayload(): ExpenseCreate {
+  save(): void {
+    const id = this.expenseId();
     const f = this.form();
     const o = this.original();
 
-    if (this.isEdit() && o) {
-      return {
-        title: f.title.trim() || o.title,
-        amount: f.amount ?? o.amount,
-        expenseDate: f.expenseDate || o.expenseDate.slice(0, 10),
-        categoryId: f.categoryId || o.categoryId,
-      };
-    }
-
-    return {
-      title: f.title,
-      amount: f.amount ?? 0,
-      expenseDate: f.expenseDate,
-      categoryId: f.categoryId,
-    };
-  }
-
-  save(): void {
-    const id = this.expenseId();
-    const payload = this.buildPayload();
     const request =
-      id !== null
-        ? this.expenseService.update(id, payload)
-        : this.expenseService.create(payload);
+      id !== null && o
+        ? this.expenseService.update(id, {
+            title: f.title.trim() || o.title,
+            amount: f.amount ?? o.amount,
+            expenseDate: f.expenseDate || o.expenseDate.slice(0, 10),
+            categoryId: f.categoryId || o.categoryId,
+          })
+        : this.expenseService.create({
+            title: f.title,
+            amount: f.amount ?? 0,
+            expenseDate: f.expenseDate,
+            categoryId: f.categoryId,
+          });
 
     request.subscribe(() => {
       this.router.navigate(['/']);

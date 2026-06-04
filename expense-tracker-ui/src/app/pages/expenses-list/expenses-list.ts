@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { ExpenseService } from '../../services/expense';
+import { ExpenseService } from '../../data-access/expense.service';
 import { Expense } from '../../shared/interfaces/expense';
 
 type SortField = 'expenseDate' | 'categoryName' | 'amount';

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CategoryService } from '../../services/category';
+import { CategoryService } from '../../data-access/category.service';
 import { Category } from '../../shared/interfaces/category';
 
 @Component({
